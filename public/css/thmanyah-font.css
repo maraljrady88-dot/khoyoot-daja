@@ -1,0 +1,56 @@
+/* ==========================================================================
+   Thmanyah (ثمنية) Arabic Font Family
+   ========================================================================== */
+
+@font-face {
+    font-family: 'Thmanyah';
+    src: url('../fonts/thmanyahsans/woff2/thmanyahsans-Light.woff2') format('woff2'),
+         url('../fonts/thmanyahsans/otf/thmanyahsans-Light.otf') format('opentype');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Thmanyah';
+    src: url('../fonts/thmanyahsans/woff2/thmanyahsans-Regular.woff2') format('woff2'),
+         url('../fonts/thmanyahsans/otf/thmanyahsans-Regular.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Thmanyah';
+    src: url('../fonts/thmanyahsans/woff2/thmanyahsans-Medium.woff2') format('woff2'),
+         url('../fonts/thmanyahsans/otf/thmanyahsans-Medium.otf') format('opentype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Thmanyah';
+    src: url('../fonts/thmanyahsans/woff2/thmanyahsans-Bold.woff2') format('woff2'),
+         url('../fonts/thmanyahsans/otf/thmanyahsans-Bold.otf') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Thmanyah';
+    src: url('../fonts/thmanyahsans/woff2/thmanyahsans-Black.woff2') format('woff2'),
+         url('../fonts/thmanyahsans/otf/thmanyahsans-Black.otf') format('opentype');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+:root {
+    --font-primary: 'Thmanyah', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+html, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, p, span, a, label {
+    font-family: var(--font-primary) !important;
+}
