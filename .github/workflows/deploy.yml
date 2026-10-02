@@ -1,0 +1,25 @@
+name: Deploy to Alwaysdata
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: 🚀 Deploy to Alwaysdata
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🌐 Trigger Alwaysdata Git Pull & Cache Clear
+        run: |
+          response=$(curl -s "https://khoyootdaja.alwaysdata.net/deploy_webhook.php?secret=khoyoot_daja_deploy_secret_2026")
+          echo "Server Response:"
+          echo "$response"
+          if echo "$response" | grep -q '"success": true'; then
+            echo "✅ Deployment completed successfully!"
+            exit 0
+          else
+            echo "❌ Deployment failed!"
+            exit 1
+          fi
