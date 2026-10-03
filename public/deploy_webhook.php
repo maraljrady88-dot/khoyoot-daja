@@ -52,7 +52,13 @@ if (is_dir($laravelDir . '/public')) {
 }
 
 // 4.5 Ensure composer dependencies are up to date
-if (!is_dir($laravelDir . '/vendor/phpmailer/phpmailer')) {
+$checkCmd = "cd " . escapeshellarg($laravelDir) . " && php -r \"require 'vendor/autoload.php'; echo class_exists('PHPMailer\\\\PHPMailer\\\\PHPMailer') ? 'EXISTS' : 'NOT_FOUND';\"";
+$checkOut = [];
+$checkRet = 0;
+exec($checkCmd . ' 2>&1', $checkOut, $checkRet);
+$output[] = ['cmd' => $checkCmd, 'exit_code' => $checkRet, 'output' => $checkOut];
+
+if (empty($checkOut) || in_array('NOT_FOUND', $checkOut) || !is_dir($laravelDir . '/vendor/phpmailer/phpmailer')) {
     runCommand("cd " . escapeshellarg($laravelDir) . " && composer install --no-dev --optimize-autoloader --no-interaction", $output);
 }
 
