@@ -173,16 +173,28 @@ class ProductController extends Controller
         ]);
 
         if ($request->hasFile('primary_image')) {
-            // Unset previous primary
-            ProductImage::where('product_id', $product->id)->update(['is_primary' => false]);
-
             $path = $request->file('primary_image')->store('products', 'public');
-            ProductImage::create([
-                'product_id' => $product->id,
-                'image_path' => $path,
-                'is_primary' => true,
-                'sort_order' => 1,
-            ]);
+
+            $currentPrimary = ProductImage::where('product_id', $product->id)
+                ->where('is_primary', true)
+                ->first();
+
+            if ($currentPrimary) {
+                // Delete previous file from storage if it exists
+                if (Storage::disk('public')->exists($currentPrimary->image_path)) {
+                    Storage::disk('public')->delete($currentPrimary->image_path);
+                }
+                $currentPrimary->update([
+                    'image_path' => $path,
+                ]);
+            } else {
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'image_path' => $path,
+                    'is_primary' => true,
+                    'sort_order' => 1,
+                ]);
+            }
         }
 
         if ($request->hasFile('images')) {
@@ -223,7 +235,20 @@ class ProductController extends Controller
     public function deleteImage(int $imageId)
     {
         $image = ProductImage::findOrFail($imageId);
+        if (Storage::disk('public')->exists($image->image_path)) {
+            Storage::disk('public')->delete($image->image_path);
+        }
+        $wasPrimary = $image->is_primary;
+        $productId = $image->product_id;
         $image->delete();
+
+        // If primary was deleted, promote first remaining image
+        if ($wasPrimary) {
+            $next = ProductImage::where('product_id', $productId)->orderBy('sort_order', 'asc')->first();
+            if ($next) {
+                $next->update(['is_primary' => true]);
+            }
+        }
 
         return back()->with('success', 'تم حذف الصورة بنجاح');
     }

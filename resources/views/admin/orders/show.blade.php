@@ -6,11 +6,11 @@
 @section('content')
 
     <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-        <a href="{{ route('admin.orders.index') }}" style="color: var(--admin-gold); font-size: 0.9rem; font-weight: 600;">
+        <a href="{{ route('admin.orders.index') }}" style="color: var(--admin-gold); font-size: 0.9rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
             &larr; العودة لقائمة الطلبات
         </a>
 
-        <div style="display: flex; gap: 10px;">
+        <div class="order-top-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
             <a href="{{ route('orders.show', $order->order_number) }}" target="_blank" class="btn btn-outline-dark btn-sm">
                 <i class="fa-solid fa-print"></i> عرض الفاتورة وطباعتها
             </a>
@@ -29,58 +29,60 @@
     <div class="admin-grid-main-side">
         
         <!-- Left Column: Items and Customer Info -->
-        <div>
+        <div style="min-width: 0; max-width: 100%;">
             <!-- Order Items -->
             <div class="admin-card">
                 <div class="admin-card-header">
                     <h3 class="admin-card-title">المنتجات المطلوبة ({{ $order->items->count() }})</h3>
                 </div>
                 <div class="admin-card-body" style="padding: 0;">
-                    <div class="table-responsive">
-                    <table class="admin-table">
+                    <div class="table-responsive" style="overflow-x: auto; width: 100%;">
+                    <table class="admin-table order-items-table" style="width: 100%; min-width: 0;">
                         <thead>
                             <tr>
-                                <th>العباية</th>
-                                <th>السعر</th>
-                                <th>الكمية</th>
-                                <th>المجموع</th>
+                                <th style="text-align: right;">العباية</th>
+                                <th style="text-align: center; white-space: nowrap;">السعر</th>
+                                <th style="text-align: center; white-space: nowrap;">الكمية</th>
+                                <th style="text-align: left; white-space: nowrap;">المجموع</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($order->items as $item)
                                 <tr>
                                     <td>
-                                        <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div style="display: flex; align-items: center; gap: 10px;">
                                             @if($item->product)
-                                                <img src="{{ $item->product->main_image_url }}" alt="{{ $item->product_name }}" class="table-img-thumb" style="width: 40px; height: 52px;">
+                                                <img src="{{ $item->product->main_image_url }}" alt="{{ $item->product_name }}" class="table-img-thumb" style="width: 38px; height: 50px; flex-shrink: 0; border-radius: 4px; object-fit: contain;">
                                             @endif
-                                            <div>
-                                                <div style="font-weight: 600;">{{ $item->product_name }}</div>
-                                                <div style="font-size: 0.78rem; color: var(--admin-text-muted);">
+                                            <div style="min-width: 0; flex: 1;">
+                                                <div style="font-weight: 600; font-size: 0.88rem; line-height: 1.4; word-break: break-word; overflow-wrap: anywhere;">
+                                                    {{ $item->product_name }}
+                                                </div>
+                                                <div style="font-size: 0.76rem; color: var(--admin-text-muted); margin-top: 2px;">
                                                     @if($item->size) مقاس: {{ $item->size }} @endif
                                                     @if($item->color) | لون: {{ $item->color }} @endif
                                                 </div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td>{{ number_format($item->product_price, 0) }} ر.س</td>
-                                    <td><strong>{{ $item->quantity }}</strong></td>
-                                    <td style="font-weight: 700;">{{ number_format($item->subtotal, 0) }} ر.س</td>
+                                    <td style="text-align: center; white-space: nowrap; font-size: 0.88rem;">{{ number_format($item->product_price, 0) }} ر.س</td>
+                                    <td style="text-align: center; font-size: 0.9rem;"><strong>{{ $item->quantity }}</strong></td>
+                                    <td style="text-align: left; font-weight: 700; white-space: nowrap; font-size: 0.9rem;">{{ number_format($item->subtotal, 0) }} ر.س</td>
                                 </tr>
                             @endforeach
                         </tbody>
-                        <tfoot style="background: #FAF8F5; font-size: 0.92rem;">
+                        <tfoot style="background: #FAF8F5; font-size: 0.9rem;">
                             <tr>
-                                <td colspan="3" style="text-align: right; padding: 12px 18px;">المجموع الفرعي:</td>
-                                <td style="padding: 12px 18px; font-weight: 600;">{{ number_format($order->subtotal, 0) }} ر.س</td>
+                                <td colspan="3" style="text-align: right; padding: 10px 14px; font-weight: 500;">المجموع الفرعي:</td>
+                                <td style="padding: 10px 14px; font-weight: 600; text-align: left; white-space: nowrap;">{{ number_format($order->subtotal, 0) }} ر.س</td>
                             </tr>
                             <tr>
-                                <td colspan="3" style="text-align: right; padding: 12px 18px;">تكلفة الشحن:</td>
-                                <td style="padding: 12px 18px; font-weight: 600;">{{ $order->shipping_cost == 0 ? 'شحن مجاني' : number_format($order->shipping_cost, 0) . ' ر.س' }}</td>
+                                <td colspan="3" style="text-align: right; padding: 10px 14px; font-weight: 500;">تكلفة الشحن:</td>
+                                <td style="padding: 10px 14px; font-weight: 600; text-align: left; white-space: nowrap;">{{ $order->shipping_cost == 0 ? 'شحن مجاني' : number_format($order->shipping_cost, 0) . ' ر.س' }}</td>
                             </tr>
-                            <tr style="font-size: 1.1rem; font-weight: 700; color: var(--admin-text-main);">
-                                <td colspan="3" style="text-align: right; padding: 14px 18px;">الإجمالي النهائي:</td>
-                                <td style="padding: 14px 18px; color: var(--admin-gold-dark);">{{ number_format($order->total, 0) }} ر.س</td>
+                            <tr style="font-size: 1.05rem; font-weight: 700; color: var(--admin-text-main);">
+                                <td colspan="3" style="text-align: right; padding: 12px 14px;">الإجمالي النهائي:</td>
+                                <td style="padding: 12px 14px; color: var(--admin-gold-dark); text-align: left; white-space: nowrap;">{{ number_format($order->total, 0) }} ر.س</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -94,42 +96,42 @@
                     <h3 class="admin-card-title">بيانات العميل وعنوان الشحن والتوصيل</h3>
                 </div>
                 <div class="admin-card-body">
-                    <div class="admin-grid-2col" style="gap: 20px; font-size: 0.92rem;">
-                        <div>
-                            <div style="color: var(--admin-text-muted); margin-bottom: 2px;">اسم العميل:</div>
-                            <strong style="font-size: 1rem;">{{ $order->customer_name }}</strong>
+                    <div class="admin-grid-2col" style="gap: 16px; font-size: 0.92rem;">
+                        <div style="min-width: 0;">
+                            <div style="color: var(--admin-text-muted); margin-bottom: 2px; font-size: 0.82rem;">اسم العميل:</div>
+                            <strong style="font-size: 0.98rem; word-break: break-word; overflow-wrap: anywhere; display: block;">{{ $order->customer_name }}</strong>
                         </div>
 
-                        <div>
-                            <div style="color: var(--admin-text-muted); margin-bottom: 2px;">رقم الجوال:</div>
-                            <strong dir="ltr" style="font-size: 1rem;">{{ $order->customer_phone }}</strong>
+                        <div style="min-width: 0;">
+                            <div style="color: var(--admin-text-muted); margin-bottom: 2px; font-size: 0.82rem;">رقم الجوال:</div>
+                            <strong dir="ltr" style="font-size: 0.98rem; display: inline-block;">{{ $order->customer_phone }}</strong>
                         </div>
 
-                        <div>
-                            <div style="color: var(--admin-text-muted); margin-bottom: 2px;">البريد الإلكتروني:</div>
-                            <div>{{ $order->customer_email ?: 'لم يُحدد' }}</div>
+                        <div style="min-width: 0;">
+                            <div style="color: var(--admin-text-muted); margin-bottom: 2px; font-size: 0.82rem;">البريد الإلكتروني:</div>
+                            <div style="word-break: break-word; overflow-wrap: anywhere;">{{ $order->customer_email ?: 'لم يُحدد' }}</div>
                         </div>
 
-                        <div>
-                            <div style="color: var(--admin-text-muted); margin-bottom: 2px;">طريقة الدفع:</div>
-                            <strong>{{ $order->payment_method_name }}</strong>
+                        <div style="min-width: 0;">
+                            <div style="color: var(--admin-text-muted); margin-bottom: 2px; font-size: 0.82rem;">طريقة الدفع:</div>
+                            <strong style="word-break: break-word;">{{ $order->payment_method_name }}</strong>
                         </div>
 
-                        <div>
-                            <div style="color: var(--admin-text-muted); margin-bottom: 2px;">المدينة والحي:</div>
-                            <strong>{{ $order->city }} - {{ $order->district }}</strong>
+                        <div style="min-width: 0;">
+                            <div style="color: var(--admin-text-muted); margin-bottom: 2px; font-size: 0.82rem;">المدينة والحي:</div>
+                            <strong style="word-break: break-word; overflow-wrap: anywhere; display: block;">{{ $order->city }} - {{ $order->district }}</strong>
                         </div>
 
-                        <div>
-                            <div style="color: var(--admin-text-muted); margin-bottom: 2px;">العنوان بالتفصيل:</div>
-                            <div>{{ $order->address }}</div>
+                        <div style="min-width: 0;">
+                            <div style="color: var(--admin-text-muted); margin-bottom: 2px; font-size: 0.82rem;">العنوان بالتفصيل:</div>
+                            <div style="word-break: break-word; overflow-wrap: anywhere; line-height: 1.5;">{{ $order->address }}</div>
                         </div>
                     </div>
 
                     @if($order->notes)
                         <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--admin-border);">
-                            <div style="color: var(--admin-text-muted); margin-bottom: 2px; font-size: 0.85rem;">ملاحظات العميل:</div>
-                            <div style="background: #FAF8F5; padding: 10px 14px; border-radius: 6px; font-size: 0.9rem;">
+                            <div style="color: var(--admin-text-muted); margin-bottom: 4px; font-size: 0.82rem;">ملاحظات العميل:</div>
+                            <div style="background: #FAF8F5; padding: 12px 14px; border-radius: 6px; font-size: 0.88rem; word-break: break-word; overflow-wrap: anywhere; line-height: 1.6; border: 1px solid var(--admin-border);">
                                 {{ $order->notes }}
                             </div>
                         </div>
@@ -139,7 +141,7 @@
         </div>
 
         <!-- Right Column: Status Control -->
-        <div>
+        <div style="min-width: 0; max-width: 100%;">
             <div class="admin-card">
                 <div class="admin-card-header">
                     <h3 class="admin-card-title">تحديث حالة الطلب</h3>

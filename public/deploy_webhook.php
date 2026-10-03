@@ -51,7 +51,16 @@ if (is_dir($laravelDir . '/public')) {
     runCommand("cp -ru " . escapeshellarg($laravelDir . '/public/') . "* " . escapeshellarg($htdocsDir . '/'), $output);
 }
 
-// 5. Clear Laravel optimize cache
+// 5. Ensure storage symlinks exist
+$laravelStorage = $laravelDir . '/storage/app/public';
+if (!file_exists($htdocsDir . '/storage') && is_dir($laravelStorage)) {
+    @symlink($laravelStorage, $htdocsDir . '/storage');
+}
+if (!file_exists($laravelDir . '/public/storage') && is_dir($laravelStorage)) {
+    @symlink($laravelStorage, $laravelDir . '/public/storage');
+}
+
+// 6. Clear Laravel optimize cache
 $artisan = $laravelDir . '/artisan';
 if (file_exists($artisan)) {
     runCommand("php " . escapeshellarg($artisan) . " optimize:clear", $output);

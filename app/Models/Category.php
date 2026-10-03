@@ -47,12 +47,26 @@ class Category extends Model
 
     public function getImageUrlAttribute(): string
     {
-        if ($this->image && file_exists(public_path('storage/' . $this->image))) {
-            return asset('storage/' . $this->image);
+        $path = $this->image;
+
+        if (empty($path)) {
+            return asset('images/logo.webp');
         }
-        if ($this->image && file_exists(public_path($this->image))) {
-            return asset($this->image);
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
         }
-        return asset('images/logo.webp');
+
+        $cleanPath = ltrim($path, '/');
+
+        if (str_starts_with($cleanPath, 'images/')) {
+            return asset($cleanPath);
+        }
+
+        if (str_starts_with($cleanPath, 'storage/')) {
+            return asset($cleanPath);
+        }
+
+        return asset('storage/' . $cleanPath);
     }
 }

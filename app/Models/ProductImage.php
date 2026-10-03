@@ -29,15 +29,29 @@ class ProductImage extends Model
 
     public function getUrlAttribute(): string
     {
-        if (str_starts_with($this->image_path, 'http://') || str_starts_with($this->image_path, 'https://')) {
-            return $this->image_path;
+        $path = $this->image_path;
+
+        if (empty($path)) {
+            return asset('images/logo.webp');
         }
-        if (file_exists(public_path('storage/' . $this->image_path))) {
-            return '/storage/' . ltrim($this->image_path, '/');
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
         }
-        if (file_exists(public_path($this->image_path))) {
-            return '/' . ltrim($this->image_path, '/');
+
+        $cleanPath = ltrim($path, '/');
+
+        // If explicitly in images/ directory
+        if (str_starts_with($cleanPath, 'images/')) {
+            return asset($cleanPath);
         }
-        return '/images/logo.webp';
+
+        // If path already starts with storage/
+        if (str_starts_with($cleanPath, 'storage/')) {
+            return asset($cleanPath);
+        }
+
+        // Standard storage upload (e.g. products/xyz.jpg)
+        return asset('storage/' . $cleanPath);
     }
 }

@@ -257,32 +257,38 @@ body.admin-body {
 /* Admin Responsive Grid Layouts */
 .admin-grid-main-side {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
     gap: 24px;
     align-items: start;
 }
 .admin-grid-dashboard {
     display: grid;
-    grid-template-columns: 1.6fr 1fr;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
     gap: 24px;
     align-items: start;
 }
 .admin-grid-offers {
     display: grid;
-    grid-template-columns: 360px 1fr;
+    grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
     gap: 24px;
     align-items: start;
 }
 .admin-grid-customer {
     display: grid;
-    grid-template-columns: 320px 1fr;
+    grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
     gap: 24px;
     align-items: start;
 }
 .admin-grid-2col {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
+}
+
+/* Order Items Table & Preview Styles */
+.order-items-table {
+    width: 100%;
+    min-width: 0 !important;
 }
 
 /* Mobile Sidebar Backdrop */
@@ -333,14 +339,33 @@ body.admin-body {
     .admin-grid-dashboard,
     .admin-grid-offers,
     .admin-grid-customer {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
         gap: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .order-items-table th,
+    .order-items-table td {
+        padding: 10px 8px !important;
+    }
+    .order-items-table .table-img-thumb {
+        width: 34px !important;
+        height: 46px !important;
+    }
+    .order-top-actions {
+        width: 100%;
+    }
+    .order-top-actions .btn {
+        flex: 1 1 auto;
+        justify-content: center;
+        text-align: center;
     }
 }
 
 @media (max-width: 640px) {
     .admin-grid-2col {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
         gap: 12px;
     }
 }
@@ -351,7 +376,7 @@ body.admin-body {
         gap: 12px;
     }
     .admin-content {
-        padding: 14px;
+        padding: 12px;
     }
     .admin-topbar {
         padding: 0 14px;
@@ -361,9 +386,30 @@ body.admin-body {
         display: none;
     }
     .admin-card-header {
-        padding: 14px 16px;
+        padding: 12px 14px;
     }
     .admin-card-body {
-        padding: 16px;
+        padding: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .order-items-table th,
+    .order-items-table td {
+        padding: 8px 6px !important;
+        font-size: 0.8rem !important;
+    }
+    .order-items-table .table-img-thumb {
+        width: 28px !important;
+        height: 38px !important;
+    }
+    .admin-content {
+        padding: 10px;
+    }
+    .admin-card-header {
+        padding: 10px 12px;
+    }
+    .admin-card-body {
+        padding: 12px 10px;
     }
 }
