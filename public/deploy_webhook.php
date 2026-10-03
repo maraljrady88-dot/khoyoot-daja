@@ -78,6 +78,9 @@ if (file_exists($artisan)) {
     runCommand("php " . escapeshellarg($artisan) . " optimize:clear", $output);
 }
 
+// 7. Read latest log entries
+runCommand("tail -n 35 " . escapeshellarg($laravelDir . '/storage/logs/laravel.log'), $output);
+
 echo json_encode([
     'success' => ($resetRet === 0),
     'timestamp' => date('Y-m-d H:i:s'),
