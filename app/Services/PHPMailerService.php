@@ -17,56 +17,66 @@ class PHPMailerService
      * @param int $expiresMinutes
      * @return array ['success' => bool, 'message' => string, 'error' => string|null]
      */
-    public function sendOtpEmail(string $recipientEmail, string $recipientName, string $otp, int $expiresMinutes = 10): array
+    public function sendOtpEmail(string $recipientEmail, string $recipientName, string $otp, int $expiresSeconds = 30): array
     {
         $mail = new PHPMailer(true);
 
         try {
-            // SMTP Configuration from .env
-            $host = env('MAIL_HOST', '127.0.0.1');
-            $port = (int) env('MAIL_PORT', 587);
-            $username = env('MAIL_USERNAME');
-            $password = env('MAIL_PASSWORD');
-            $encryption = strtolower((string) env('MAIL_ENCRYPTION', 'tls'));
-            $fromAddress = env('MAIL_FROM_ADDRESS', 'noreply@khoyootdaja.alwaysdata.net');
-            $fromName = env('MAIL_FROM_NAME', 'خيوط دعجاء للعبايات الخليجية');
+            // SMTP / Mail Configuration from config() and .env
+            $host = config('mail.mailers.smtp.host') ?: env('MAIL_HOST', '127.0.0.1');
+            $port = (int) (config('mail.mailers.smtp.port') ?: env('MAIL_PORT', 587));
+            $username = config('mail.mailers.smtp.username') ?: env('MAIL_USERNAME');
+            $password = config('mail.mailers.smtp.password') ?: env('MAIL_PASSWORD');
+            $encryption = strtolower((string) (config('mail.mailers.smtp.encryption') ?: env('MAIL_ENCRYPTION', 'tls')));
+            $fromAddress = config('mail.from.address') ?: env('MAIL_FROM_ADDRESS', 'noreply@khoyootdaja.alwaysdata.net');
+            $fromName = config('mail.from.name') ?: env('MAIL_FROM_NAME', 'خيوط دعجاء');
 
-            // Server settings
-            $mail->isSMTP();
-            $mail->Host       = $host;
-            $mail->Port       = $port;
-            $mail->CharSet    = 'UTF-8';
-            $mail->Timeout    = 15; // 15 seconds timeout
+            $mail->CharSet = 'UTF-8';
+            $mail->Timeout = 15;
 
-            // Authentication
-            if (!empty($username) && !empty($password)) {
+            // Determine delivery transport:
+            // 1) If external SMTP credentials are provided, use SMTP
+            $isLocalHost = in_array(strtolower(trim($host)), ['127.0.0.1', 'localhost', '']);
+            $hasAuth = !empty($username) && !empty($password);
+
+            if (!$isLocalHost && $hasAuth) {
+                $mail->isSMTP();
+                $mail->Host       = $host;
+                $mail->Port       = $port;
                 $mail->SMTPAuth   = true;
                 $mail->Username   = $username;
                 $mail->Password   = $password;
-            } else {
-                $mail->SMTPAuth   = false;
-            }
 
-            // Encryption
-            if ($encryption === 'tls') {
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            } elseif ($encryption === 'ssl') {
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+                if ($encryption === 'tls') {
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                } elseif ($encryption === 'ssl') {
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+                } else {
+                    $mail->SMTPSecure = false;
+                    $mail->SMTPAutoTLS = false;
+                }
+            } elseif (function_exists('mail') || file_exists('/usr/sbin/sendmail')) {
+                // Use server native sendmail MTA (Alwaysdata default)
+                $mail->isSendmail();
             } else {
-                $mail->SMTPSecure = false;
-                $mail->SMTPAutoTLS = false;
+                $mail->isMail();
             }
 
             // Recipients
             $mail->setFrom($fromAddress, $fromName);
-            $mail->addAddress($recipientEmail, $recipientName ?: 'عميلة خيوط دعجاء');
+            $mail->addAddress($recipientEmail, $recipientName ?: 'عميل خيوط دعجاء');
             $mail->addReplyTo($fromAddress, $fromName);
+
+            // Format expiry display text (e.g. "30 ثانية" or "10 دقائق")
+            $expiryText = $expiresSeconds >= 60 
+                ? (round($expiresSeconds / 60) . ' دقائق') 
+                : ($expiresSeconds . ' ثانية');
 
             // Content
             $mail->isHTML(true);
-            $mail->Subject = 'رمز التحقق من حسابكِ في متجر خيوط دعجاء | ' . $otp;
-            $mail->Body    = $this->buildOtpEmailHtml($recipientName, $otp, $expiresMinutes);
-            $mail->AltBody = "مرحباً بكِ في خيوط دعجاء\n\nرمز التحقق الخاص بحسابكِ هو: {$otp}\nهذا الرمز صالح لمدة {$expiresMinutes} دقائق.\n\nتنبيه: لا تشاركي هذا الرمز مع أي شخص.\nإذا لم تقومي بإنشاء حساب، يمكنكِ تجاهل هذه الرسالة.";
+            $mail->Subject = 'رمز التحقق من حسابك في متجر خيوط دعجاء | ' . $otp;
+            $mail->Body    = $this->buildOtpEmailHtml($recipientName, $otp, $expiryText);
+            $mail->AltBody = "مرحباً بك في خيوط دعجاء\n\nرمز التحقق الخاص بحسابك هو: {$otp}\nهذا الرمز صالح لمدة {$expiryText}.\n\nتنبيه: لا تشارك هذا الرمز مع أي شخص.\nإذا لم تقم بإنشاء هذا الحساب، يمكنك تجاهل هذه الرسالة.";
 
             $mail->send();
 
@@ -74,7 +84,7 @@ class PHPMailerService
 
             return [
                 'success' => true,
-                'message' => 'تم إرسال رمز التحقق إلى بريدكِ الإلكتروني بنجاح.',
+                'message' => 'تم إرسال رمز التحقق إلى بريدك الإلكتروني بنجاح.',
                 'error'   => null,
             ];
         } catch (Exception $e) {
@@ -100,9 +110,9 @@ class PHPMailerService
     /**
      * Generate luxury branded HTML email body.
      */
-    protected function buildOtpEmailHtml(string $recipientName, string $otp, int $expiresMinutes): string
+    protected function buildOtpEmailHtml(string $recipientName, string $otp, string $expiryText): string
     {
-        $safeName = htmlspecialchars($recipientName ?: 'عميلتنا الكريمة', ENT_QUOTES, 'UTF-8');
+        $safeName = htmlspecialchars($recipientName ?: 'عميلنا العزيز', ENT_QUOTES, 'UTF-8');
         $siteUrl = rtrim(env('APP_URL', 'https://khoyootdaja.alwaysdata.net'), '/');
 
         return <<<HTML
@@ -131,26 +141,26 @@ class PHPMailerService
 <div class="email-container">
     <div class="email-header">
         <div style="font-size: 26px; color: #BFA175; font-weight: 800;">خيوط دعجاء</div>
-        <div class="email-subtitle">أصالة وفخامة تليق بكِ ✦ عبايات خليجية فاخرة</div>
+        <div class="email-subtitle">أصالة وفخامة تليق بك ✦ عبايات خليجية فاخرة</div>
     </div>
     <div class="email-body">
-        <div class="greeting">أهلاً بكِ في خيوط دعجاء، {$safeName} ✨</div>
+        <div class="greeting">أهلاً بك في خيوط دعجاء، {$safeName} ✨</div>
         <p>
-            سعداء جداً بانضمامكِ إلينا! لتأكيد بريدكِ الإلكتروني وتفعيل حسابكِ بنجاح، يُرجى استخدام رمز التحقق التالي:
+            سعداء جداً بانضمامك إلينا! لتأكيد بريدك الإلكتروني وتفعيل حسابك بنجاح، يُرجى استخدام رمز التحقق التالي:
         </p>
 
         <div class="otp-box">
-            <div style="font-size: 13px; color: #64748B; margin-bottom: 4px;">رمز التحقق الخاص بكِ (OTP):</div>
+            <div style="font-size: 13px; color: #64748B; margin-bottom: 4px;">رمز التحقق الخاص بحسابك (OTP):</div>
             <div class="otp-code">{$otp}</div>
-            <div class="otp-expiry">⏱️ هذا الرمز صالح لمدة {$expiresMinutes} دقائق فقط</div>
+            <div class="otp-expiry">⏱️ هذا الرمز صالح لمدة {$expiryText} فقط</div>
         </div>
 
         <div class="warning-box">
-            <strong>⚠️ تنبيه أمني:</strong> لا تشاركي هذا الرمز مع أي شخص. لن يطلب منكِ فريق خيوط دعجاء هذا الرمز عبر الهاتف أو الواتساب أبداً.
+            <strong>⚠️ تنبيه أمني:</strong> لا تشارك هذا الرمز مع أي شخص. لن يطلب منك فريق خيوط دعجاء هذا الرمز عبر الهاتف أو الواتساب أبداً.
         </div>
 
         <p style="font-size: 13px; color: #64748B; margin-top: 24px;">
-            إذا لم تقومي بطلب إنشاء حساب في متجر خيوط دعجاء، يمكنكِ تجاهل هذه الرسالة ولن يتم إنشاء الحساب.
+            إذا لم تقم بطلب إنشاء حساب في متجر خيوط دعجاء، يمكنك تجاهل هذه الرسالة ولن يتم إنشاء الحساب.
         </p>
     </div>
     <div class="email-footer">

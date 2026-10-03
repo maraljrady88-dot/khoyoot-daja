@@ -53,7 +53,7 @@ class EmailVerificationController extends Controller
         }
 
         if ($user->isEmailVerified()) {
-            return redirect()->route('home')->with('info', 'تم توثيق بريدكِ الإلكتروني بالفعل.');
+            return redirect()->route('home')->with('info', 'تم توثيق بريدك الإلكتروني بالفعل.');
         }
 
         $cooldown = $user->getOtpCooldownSeconds(60);
@@ -84,13 +84,13 @@ class EmailVerificationController extends Controller
             if (!Auth::check()) {
                 Auth::login($user);
             }
-            return redirect()->route('home')->with('info', 'حسابكِ موثق بالفعل.');
+            return redirect()->route('home')->with('info', 'حسابك موثق بالفعل.');
         }
 
-        // Check if OTP has expired (10 minutes)
+        // Check if OTP has expired (30 seconds)
         if (is_null($user->otp_expires_at) || $user->otp_expires_at->isPast()) {
             return back()->withErrors([
-                'otp' => 'انتهت صلاحية رمز التحقق (صالح لمدة 10 دقائق). يرجى الضغط على "إعادة إرسال الرمز" للحصول على رمز جديد.',
+                'otp' => 'انتهت صلاحية رمز التحقق (صالح لمدة 30 ثانية). يرجى الضغط على "إعادة إرسال رمز التحقق" للحصول على رمز جديد.',
             ]);
         }
 
@@ -108,7 +108,7 @@ class EmailVerificationController extends Controller
 
             $errorMsg = 'رمز التحقق غير صحيح، يرجى التأكد من الرمز المدخل والمحاولة مجدداً.';
             if ($remaining > 0) {
-                $errorMsg .= " (متبقي لديكِ {$remaining} محاولات)";
+                $errorMsg .= " (متبقي لديك {$remaining} محاولات)";
             }
 
             return back()->withErrors(['otp' => $errorMsg]);
@@ -129,7 +129,7 @@ class EmailVerificationController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('home')->with('success', "تم توثيق بريدكِ الإلكتروني وتفعيل الحساب بنجاح! نورتِ متجر خيوط دعجاء، {$user->name}.");
+        return redirect()->route('home')->with('success', "تم توثيق بريدك الإلكتروني وتفعيل الحساب بنجاح! مرحباً بك في متجر خيوط دعجاء، {$user->name}.");
     }
 
     /**
@@ -144,7 +144,7 @@ class EmailVerificationController extends Controller
         }
 
         if ($user->isEmailVerified()) {
-            return redirect()->route('home')->with('info', 'حسابكِ موثق بالفعل.');
+            return redirect()->route('home')->with('info', 'حسابك موثق بالفعل.');
         }
 
         // Cooldown enforcement (60 seconds)
@@ -168,18 +168,18 @@ class EmailVerificationController extends Controller
         // Invalidate old OTP and store new hashed OTP
         $user->update([
             'otp_hash'         => Hash::make($newOtp),
-            'otp_expires_at'   => now()->addMinutes(10),
+            'otp_expires_at'   => now()->addSeconds(30),
             'otp_last_sent_at' => now(),
             'otp_attempts'     => 0,
         ]);
 
         // Send via PHPMailer
-        $result = $this->mailer->sendOtpEmail($user->email, $user->name, $newOtp, 10);
+        $result = $this->mailer->sendOtpEmail($user->email, $user->name, $newOtp, 30);
 
         if (!$result['success']) {
             return back()->with('warning', 'تم إصدار رمز جديد ولكن تعذر تسليم البريد عبر الخادم حالياً. يرجى المحاولة بعد قليل.');
         }
 
-        return back()->with('success', 'تم إرسال رمز تحقق جديد إلى بريدكِ الإلكتروني بنجاح.');
+        return back()->with('success', 'تم إرسال رمز تحقق جديد إلى بريدك الإلكتروني بنجاح.');
     }
 }

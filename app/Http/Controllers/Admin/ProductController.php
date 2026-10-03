@@ -55,7 +55,7 @@ class ProductController extends Controller
             'category_id' => 'required|exists:categories,id',
             'sku' => 'nullable|string|max:100|unique:products,sku',
             'price' => 'required|numeric|min:0',
-            'compare_at_price' => 'nullable|numeric|gt:price',
+            'compare_at_price' => 'nullable|numeric|min:0',
             'stock_quantity' => 'required|integer|min:0',
             'low_stock_threshold' => 'nullable|integer|min:0',
             'short_description' => 'nullable|string|max:500',
@@ -67,6 +67,19 @@ class ProductController extends Controller
             'is_active' => 'nullable|boolean',
             'primary_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+        ], [
+            'name.required' => 'يرجى كتابة اسم العباية / المنتج.',
+            'category_id.required' => 'يرجى اختيار القسم.',
+            'category_id.exists' => 'القسم المختار غير موجود.',
+            'price.required' => 'يرجى كتابة سعر البيع.',
+            'price.numeric' => 'يجب أن يكون السعر قيمة عددية.',
+            'price.min' => 'سعر البيع لا يمكن أن يكون سالباً.',
+            'compare_at_price.numeric' => 'السعر قبل الخصم يجب أن يكون قيمة عددية.',
+            'compare_at_price.min' => 'السعر قبل الخصم لا يمكن أن يكون سالباً.',
+            'stock_quantity.required' => 'يرجى إدخال كمية المخزون.',
+            'stock_quantity.integer' => 'كمية المخزون يجب أن تكون رقماً صحيحاً.',
+            'primary_image.image' => 'الملف يجب أن يكون صورة صالحة.',
+            'primary_image.max' => 'حجم الصورة لا يجب أن يتجاوز 5 ميجابايت.',
         ]);
 
         $colors = [];
@@ -74,12 +87,17 @@ class ProductController extends Controller
             $colors = array_filter(array_map('trim', explode(',', $request->colors)));
         }
 
+        // Compare at price should be higher than price to qualify as a discount
+        $compareAtPrice = ($request->filled('compare_at_price') && (float) $request->compare_at_price > (float) $request->price)
+            ? $request->compare_at_price
+            : null;
+
         $product = Product::create([
             'category_id' => $request->category_id,
             'name' => $request->name,
             'sku' => $request->sku ?: ('DJ-' . strtoupper(Str::random(6))),
             'price' => $request->price,
-            'compare_at_price' => $request->compare_at_price,
+            'compare_at_price' => $compareAtPrice,
             'stock_quantity' => $request->stock_quantity,
             'low_stock_threshold' => $request->low_stock_threshold ?: 3,
             'short_description' => $request->short_description,
@@ -136,7 +154,7 @@ class ProductController extends Controller
             'category_id' => 'required|exists:categories,id',
             'sku' => 'nullable|string|max:100|unique:products,sku,' . $product->id,
             'price' => 'required|numeric|min:0',
-            'compare_at_price' => 'nullable|numeric|gt:price',
+            'compare_at_price' => 'nullable|numeric|min:0',
             'stock_quantity' => 'required|integer|min:0',
             'low_stock_threshold' => 'nullable|integer|min:0',
             'short_description' => 'nullable|string|max:500',
@@ -148,6 +166,19 @@ class ProductController extends Controller
             'is_active' => 'nullable|boolean',
             'primary_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+        ], [
+            'name.required' => 'يرجى كتابة اسم العباية / المنتج.',
+            'category_id.required' => 'يرجى اختيار القسم.',
+            'category_id.exists' => 'القسم المختار غير موجود.',
+            'price.required' => 'يرجى كتابة سعر البيع.',
+            'price.numeric' => 'يجب أن يكون السعر قيمة عددية.',
+            'price.min' => 'سعر البيع لا يمكن أن يكون سالباً.',
+            'compare_at_price.numeric' => 'السعر قبل الخصم يجب أن يكون قيمة عددية.',
+            'compare_at_price.min' => 'السعر قبل الخصم لا يمكن أن يكون سالباً.',
+            'stock_quantity.required' => 'يرجى إدخال كمية المخزون.',
+            'stock_quantity.integer' => 'كمية المخزون يجب أن تكون رقماً صحيحاً.',
+            'primary_image.image' => 'الملف يجب أن يكون صورة صالحة.',
+            'primary_image.max' => 'حجم الصورة لا يجب أن يتجاوز 5 ميجابايت.',
         ]);
 
         $colors = [];
@@ -155,12 +186,16 @@ class ProductController extends Controller
             $colors = array_filter(array_map('trim', explode(',', $request->colors)));
         }
 
+        $compareAtPrice = ($request->filled('compare_at_price') && (float) $request->compare_at_price > (float) $request->price)
+            ? $request->compare_at_price
+            : null;
+
         $product->update([
             'category_id' => $request->category_id,
             'name' => $request->name,
             'sku' => $request->sku ?: $product->sku,
             'price' => $request->price,
-            'compare_at_price' => $request->compare_at_price,
+            'compare_at_price' => $compareAtPrice,
             'stock_quantity' => $request->stock_quantity,
             'low_stock_threshold' => $request->low_stock_threshold ?: 3,
             'short_description' => $request->short_description,

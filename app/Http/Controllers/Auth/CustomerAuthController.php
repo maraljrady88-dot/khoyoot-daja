@@ -65,14 +65,14 @@ class CustomerAuthController extends Controller
                     $otp = str_pad((string) random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
                     $user->update([
                         'otp_hash'         => Hash::make($otp),
-                        'otp_expires_at'   => now()->addMinutes(10),
+                        'otp_expires_at'   => now()->addSeconds(30),
                         'otp_last_sent_at' => now(),
                         'otp_attempts'     => 0,
                     ]);
-                    app(\App\Services\PHPMailerService::class)->sendOtpEmail($user->email, $user->name, $otp, 10);
+                    app(\App\Services\PHPMailerService::class)->sendOtpEmail($user->email, $user->name, $otp, 30);
                 }
 
-                return redirect()->route('verification.notice')->with('info', 'يرجى توثيق بريدكِ الإلكتروني أولاً لتتمكني من الدخول إلى حسابكِ.');
+                return redirect()->route('verification.notice')->with('info', 'يرجى توثيق بريدك الإلكتروني أولاً لتتمكن من الدخول إلى حسابك.');
             }
 
             \Illuminate\Support\Facades\RateLimiter::clear($throttleKey);
@@ -82,7 +82,7 @@ class CustomerAuthController extends Controller
                 return redirect()->intended(route('admin.dashboard'));
             }
 
-            return redirect()->intended(route('home'))->with('success', "أهلاً بكِ مجدداً، {$user->name}!");
+            return redirect()->intended(route('home'))->with('success', "أهلاً بك مجدداً، {$user->name}!");
         }
 
         \Illuminate\Support\Facades\RateLimiter::hit($throttleKey, 60);
@@ -131,24 +131,24 @@ class CustomerAuthController extends Controller
             'is_active'         => true,
             'email_verified_at' => null,
             'otp_hash'          => Hash::make($otp),
-            'otp_expires_at'    => now()->addMinutes(10),
+            'otp_expires_at'    => now()->addSeconds(30),
             'otp_last_sent_at'  => now(),
             'otp_attempts'      => 0,
         ]);
 
         // Send OTP via PHPMailer
         $mailer = app(\App\Services\PHPMailerService::class);
-        $result = $mailer->sendOtpEmail($user->email, $user->name, $otp, 10);
+        $result = $mailer->sendOtpEmail($user->email, $user->name, $otp, 30);
 
         // Store user in session for verification page
         $request->session()->put('verify_user_id', $user->id);
         $request->session()->put('verify_email', $user->email);
 
         if (!$result['success']) {
-            return redirect()->route('verification.notice')->with('warning', 'تم إنشاء الحساب، ولكن تعذر تسليم البريد عبر الخادم فوراً. يمكنكِ طلب إعادة إرسال الرمز.');
+            return redirect()->route('verification.notice')->with('warning', 'تم إنشاء الحساب، ولكن تعذر تسليم البريد عبر الخادم فوراً. يمكنك طلب إعادة إرسال الرمز.');
         }
 
-        return redirect()->route('verification.notice')->with('success', 'تم إنشاء حسابكِ بنجاح! تم إرسال رمز التحقق (OTP) إلى بريدكِ الإلكتروني.');
+        return redirect()->route('verification.notice')->with('success', 'تم إنشاء حسابك بنجاح! تم إرسال رمز التحقق (OTP) إلى بريدك الإلكتروني.');
     }
 
     public function logout(Request $request)

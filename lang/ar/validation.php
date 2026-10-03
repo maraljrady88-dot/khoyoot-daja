@@ -1,0 +1,77 @@
+<?php
+
+return [
+    'accepted' => 'يجب قبول :attribute.',
+    'active_url' => ':attribute لا يمثل رابطاً صحيحاً.',
+    'after' => 'يجب على :attribute أن يكون تاريخاً لاحقاً لـ :date.',
+    'alpha' => 'يجب أن يحتوي :attribute على أحرف فقط.',
+    'alpha_dash' => 'يجب أن يحتوي :attribute على أحرف، أرقام، شرطات وشرطات سفلية فقط.',
+    'alpha_num' => 'يجب أن يحتوي :attribute على أحرف وأرقام فقط.',
+    'array' => 'يجب أن يكون :attribute مصفوفة.',
+    'before' => 'يجب على :attribute أن يكون تاريخاً سابقاً لـ :date.',
+    'between' => [
+        'numeric' => 'يجب أن تكون قيمة :attribute بين :min و :max.',
+        'file' => 'يجب أن يكون حجم ملف :attribute بين :min و :max كيلوبايت.',
+        'string' => 'يجب أن يتراوح عدد حروف :attribute بين :min و :max حرفاً.',
+        'array' => 'يجب أن يحتوي :attribute على عدد من العناصر بين :min و :max.',
+    ],
+    'boolean' => 'يجب أن تكون قيمة :attribute إما صحيح أو خطأ.',
+    'confirmed' => 'حقل تأكيد :attribute غير متطابق.',
+    'date' => ':attribute ليس تاريخاً صحيحاً.',
+    'email' => 'يجب أن يكون :attribute عنوان بريد إلكتروني صحيح.',
+    'exists' => 'القيمة المحددة لـ :attribute غير صالحة.',
+    'gt' => [
+        'numeric' => 'يجب أن تكون قيمة :attribute أكبر من :value.',
+        'file' => 'يجب أن يكون حجم ملف :attribute أكبر من :value كيلوبايت.',
+        'string' => 'يجب أن يكون عدد حروف :attribute أكثر من :value حرفاً.',
+        'array' => 'يجب أن يحتوي :attribute على أكثر من :value عنصر.',
+    ],
+    'gte' => [
+        'numeric' => 'يجب أن تكون قيمة :attribute مساوية أو أكبر من :value.',
+    ],
+    'image' => 'يجب أن يكون :attribute صورة.',
+    'in' => 'القيمة المحددة لـ :attribute غير صالحة.',
+    'integer' => 'يجب أن يكون :attribute عدداً صحيحاً.',
+    'lt' => [
+        'numeric' => 'يجب أن تكون قيمة :attribute أقل من :value.',
+    ],
+    'lte' => [
+        'numeric' => 'يجب أن تكون قيمة :attribute مساوية أو أقل من :value.',
+    ],
+    'max' => [
+        'numeric' => 'يجب ألا تكون قيمة :attribute أكبر من :max.',
+        'file' => 'يجب ألا يتجاوز حجم ملف :attribute :max كيلوبايت.',
+        'string' => 'يجب ألا يتجاوز عدد حروف :attribute :max حرفاً.',
+        'array' => 'يجب ألا يحتوي :attribute على أكثر من :max عنصر.',
+    ],
+    'min' => [
+        'numeric' => 'يجب أن تكون قيمة :attribute مساوية أو أكبر من :min.',
+        'file' => 'يجب ألا يقل حجم ملف :attribute عن :min كيلوبايت.',
+        'string' => 'يجب ألا يقل عدد حروف :attribute عن :min حرفاً.',
+        'array' => 'يجب أن يحتوي :attribute على الأقل على :min عنصر.',
+    ],
+    'numeric' => 'يجب أن تكون قيمة :attribute عدداً.',
+    'required' => 'حقل :attribute مطلوب.',
+    'same' => 'يجب أن يتطابق :attribute مع :other.',
+    'size' => [
+        'numeric' => 'يجب أن تكون قيمة :attribute مساوية لـ :size.',
+        'string' => 'يجب أن يحتوي :attribute على :size حرفاً بالضبط.',
+    ],
+    'string' => 'يجب أن يكون :attribute نصاً.',
+    'unique' => 'قيمة :attribute مسجلة مسبقاً ومستخدمة.',
+
+    'attributes' => [
+        'name' => 'الاسم',
+        'email' => 'البريد الإلكتروني',
+        'phone' => 'رقم الجوال',
+        'password' => 'كلمة المرور',
+        'password_confirmation' => 'تأكيد كلمة المرور',
+        'price' => 'سعر البيع',
+        'compare_at_price' => 'السعر قبل الخصم',
+        'stock_quantity' => 'كمية المخزون',
+        'category_id' => 'القسم',
+        'otp' => 'رمز التحقق',
+        'primary_image' => 'الصورة الرئيسية',
+        'images' => 'صور المعرض',
+    ],
+];

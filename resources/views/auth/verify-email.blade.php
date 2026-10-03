@@ -17,7 +17,7 @@
                         تأكيد البريد الإلكتروني
                     </h1>
                     <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; margin: 0;">
-                        أرسلنا رمز تحقق (OTP) مكون من 6 أرقام إلى بريدكِ الإلكتروني:<br>
+                        أرسلنا رمز تحقق (OTP) مكون من 6 أرقام إلى بريدك الإلكتروني:<br>
                         <strong dir="ltr" style="color: var(--brand-primary); font-size: 0.95rem; display: inline-block; margin-top: 4px;">{{ $email }}</strong>
                     </p>
                 </div>
@@ -56,7 +56,7 @@
                     
                     <div class="form-group" style="margin-bottom: 22px; text-align: center;">
                         <label class="form-label" style="display: block; font-size: 0.92rem; font-weight: 600; margin-bottom: 10px;">
-                            أدخلي رمز التحقق (6 أرقام):
+                            أدخل رمز التحقق (6 أرقام):
                         </label>
                         <input type="text" 
                                name="otp" 
@@ -72,7 +72,7 @@
                                dir="ltr" 
                                style="font-family: 'Courier New', Courier, monospace; font-size: 1.75rem; font-weight: 800; letter-spacing: 12px; text-align: center; height: 56px; border: 2px solid var(--brand-gold); background: #FAF8F5; border-radius: 8px;">
                         <small style="color: var(--text-muted); font-size: 0.78rem; display: block; margin-top: 6px;">
-                            ⏱️ صلاحية الرمز: 10 دقائق من وقت الإرسال
+                            ⏱️ صلاحية الرمز: 30 ثانية من وقت الإرسال
                         </small>
                     </div>
 
@@ -84,7 +84,7 @@
                 <!-- Resend OTP Section -->
                 <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-light); text-align: center;">
                     <div style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 10px;">
-                        لم يصلكِ الرمز بعد؟ تفحّصي صندوق الرسائل غير المرغوب فيها (Junk/Spam).
+                        لم يصلك الرمز بعد؟ تفحّص صندوق الرسائل غير المرغوب فيها (Junk/Spam).
                     </div>
                     
                     <form action="{{ route('verification.resend') }}" method="POST" id="resendOtpForm">
