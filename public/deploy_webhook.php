@@ -78,8 +78,12 @@ if (file_exists($artisan)) {
     runCommand("php " . escapeshellarg($artisan) . " optimize:clear", $output);
 }
 
-// 7. Read latest log entries
-runCommand("tail -n 35 " . escapeshellarg($laravelDir . '/storage/logs/laravel.log'), $output);
+// 7. Check mail capabilities
+$mailTestCmd = "php -r \"echo 'MAIL_FUNC:' . (function_exists('mail') ? 'YES' : 'NO') . ' | SENDMAIL_BIN:' . (file_exists('/usr/sbin/sendmail') ? 'YES' : 'NO') . ' | SENDMAIL_PATH:' . ini_get('sendmail_path');\"";
+runCommand($mailTestCmd, $output);
+
+// 8. Read latest log entries
+runCommand("tail -n 15 " . escapeshellarg($laravelDir . '/storage/logs/laravel.log'), $output);
 
 echo json_encode([
     'success' => ($resetRet === 0),
