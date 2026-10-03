@@ -78,9 +78,23 @@ if (file_exists($artisan)) {
     runCommand("php " . escapeshellarg($artisan) . " optimize:clear", $output);
 }
 
-// 7. Check mail capabilities
-$mailTestCmd = "php -r \"echo 'MAIL_FUNC:' . (function_exists('mail') ? 'YES' : 'NO') . ' | SENDMAIL_BIN:' . (file_exists('/usr/sbin/sendmail') ? 'YES' : 'NO') . ' | SENDMAIL_PATH:' . ini_get('sendmail_path');\"";
-runCommand($mailTestCmd, $output);
+// 7. Check mail capabilities and test PHPMailer isSendmail
+$sendmailTestCmd = "cd " . escapeshellarg($laravelDir) . " && php -r \"
+require 'vendor/autoload.php';
+\$m = new PHPMailer\\\\PHPMailer\\\\PHPMailer(true);
+\$m->isSendmail();
+\$m->setFrom('noreply@khoyootdaja.alwaysdata.net', 'خيوط دعجاء');
+\$m->addAddress('hhtlr5504@gmail.com');
+\$m->Subject = 'اختبار التحقق من خيوط دعجاء';
+\$m->Body = 'هذه رسالة اختبارية لتأكيد وصول بريد التحقق';
+try {
+    \$m->send();
+    echo 'SENDMAIL_DISPATCHED_SUCCESSFULLY';
+} catch (\\\\Throwable \$e) {
+    echo 'SENDMAIL_ERROR: ' . \$e->getMessage();
+}
+\"";
+runCommand($sendmailTestCmd, $output);
 
 // 8. Read latest log entries
 runCommand("tail -n 15 " . escapeshellarg($laravelDir . '/storage/logs/laravel.log'), $output);
