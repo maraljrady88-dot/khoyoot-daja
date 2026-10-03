@@ -30,10 +30,13 @@ class EmailVerificationController extends Controller
 
         $userId = $request->session()->get('verify_user_id');
         if ($userId) {
-            return User::find($userId);
+            $user = User::find($userId);
+            if ($user) {
+                return $user;
+            }
         }
 
-        $email = $request->session()->get('verify_email');
+        $email = $request->session()->get('verify_email') ?: $request->input('email');
         if ($email) {
             return User::where('email', $email)->first();
         }

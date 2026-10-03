@@ -15,6 +15,12 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->append(\App\Http\Middleware\SecurityHeadersMiddleware::class);
 
+        $middleware->validateCsrfTokens(except: [
+            'verify-email',
+            'verify-email/*',
+            'deploy_webhook.php',
+        ]);
+
         $middleware->redirectGuestsTo(fn (\Illuminate\Http\Request $request) => $request->is('admin*') ? route('admin.login') : route('login'));
 
         $middleware->alias([
@@ -22,5 +28,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, \Illuminate\Http\Request $request) {
+            return redirect()->route('verification.notice')
+                ->with('error', 'انتهت صلاحية الجلسة، يرجى إعادة إدخال الرمز أو طلب رمز جديد.');
+        });
     })->create();

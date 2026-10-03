@@ -53,6 +53,7 @@
                 <!-- OTP Verification Form -->
                 <form action="{{ route('verification.verify') }}" method="POST" id="verifyOtpForm">
                     @csrf
+                    <input type="hidden" name="email" value="{{ $email }}">
                     
                     <div class="form-group" style="margin-bottom: 22px; text-align: center;">
                         <label class="form-label" style="display: block; font-size: 0.92rem; font-weight: 600; margin-bottom: 10px;">
@@ -89,6 +90,7 @@
                     
                     <form action="{{ route('verification.resend') }}" method="POST" id="resendOtpForm">
                         @csrf
+                        <input type="hidden" name="email" value="{{ $email }}">
                         <button type="submit" 
                                 id="resendBtn" 
                                 class="btn btn-outline-dark btn-sm" 

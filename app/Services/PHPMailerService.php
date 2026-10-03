@@ -62,10 +62,18 @@ class PHPMailerService
                 $mail->isMail();
             }
 
-            // Recipients
+            // Recipients & Sender Configuration
             $mail->setFrom($fromAddress, $fromName);
             $mail->addAddress($recipientEmail, $recipientName ?: 'عميل خيوط دعجاء');
             $mail->addReplyTo($fromAddress, $fromName);
+
+            // Anti-Spam & Delivery Optimization
+            $mail->Hostname = 'khoyootdaja.alwaysdata.net';
+            $mail->Sender = $fromAddress; // Sets Return-Path for SPF alignment
+            $mail->XMailer = ''; // Suppress X-Mailer header so spam filters don't penalize
+            $mail->Priority = 1;
+            $mail->addCustomHeader('Auto-Submitted', 'auto-generated');
+            $mail->addCustomHeader('X-Auto-Response-Suppress', 'OOF, AutoReply');
 
             // Format expiry display text (e.g. "30 ثانية" or "10 دقائق")
             $expiryText = $expiresSeconds >= 60 
@@ -74,9 +82,9 @@ class PHPMailerService
 
             // Content
             $mail->isHTML(true);
-            $mail->Subject = 'رمز التحقق من حسابك في متجر خيوط دعجاء | ' . $otp;
+            $mail->Subject = 'رمز التحقق الخاص بحسابك في متجر خيوط دعجاء';
             $mail->Body    = $this->buildOtpEmailHtml($recipientName, $otp, $expiryText);
-            $mail->AltBody = "مرحباً بك في خيوط دعجاء\n\nرمز التحقق الخاص بحسابك هو: {$otp}\nهذا الرمز صالح لمدة {$expiryText}.\n\nتنبيه: لا تشارك هذا الرمز مع أي شخص.\nإذا لم تقم بإنشاء هذا الحساب، يمكنك تجاهل هذه الرسالة.";
+            $mail->AltBody = "مرحباً بك في متجر خيوط دعجاء\n\nرمز التحقق الخاص بحسابك هو: {$otp}\nهذا الرمز صالح لمدة {$expiryText}.\n\nتنبيه: لا تشارك هذا الرمز مع أي شخص.\nإذا لم تقم بإنشاء هذا الحساب، يمكنك تجاهل هذه الرسالة.";
 
             $mail->send();
 
