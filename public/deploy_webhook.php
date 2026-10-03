@@ -51,6 +51,11 @@ if (is_dir($laravelDir . '/public')) {
     runCommand("cp -ru " . escapeshellarg($laravelDir . '/public/') . "* " . escapeshellarg($htdocsDir . '/'), $output);
 }
 
+// 4.5 Ensure composer dependencies are up to date
+if (!is_dir($laravelDir . '/vendor/phpmailer/phpmailer')) {
+    runCommand("cd " . escapeshellarg($laravelDir) . " && composer install --no-dev --optimize-autoloader --no-interaction", $output);
+}
+
 // 5. Ensure storage symlinks exist
 $laravelStorage = $laravelDir . '/storage/app/public';
 if (!file_exists($htdocsDir . '/storage') && is_dir($laravelStorage)) {
@@ -60,9 +65,10 @@ if (!file_exists($laravelDir . '/public/storage') && is_dir($laravelStorage)) {
     @symlink($laravelStorage, $laravelDir . '/public/storage');
 }
 
-// 6. Clear Laravel optimize cache
+// 6. Run migrations if any
 $artisan = $laravelDir . '/artisan';
 if (file_exists($artisan)) {
+    runCommand("php " . escapeshellarg($artisan) . " migrate --force --no-interaction", $output);
     runCommand("php " . escapeshellarg($artisan) . " optimize:clear", $output);
 }
 
