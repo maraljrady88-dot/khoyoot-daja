@@ -54,6 +54,27 @@ class CustomerAuthController extends Controller
                 return back()->with('error', 'هذا الحساب معطل حالياً، يرجى التواصل مع إدارة المتجر.');
             }
 
+            // Verify email check for customers
+            if (!$user->isAdmin() && !$user->isEmailVerified()) {
+                Auth::logout();
+                $request->session()->put('verify_user_id', $user->id);
+                $request->session()->put('verify_email', $user->email);
+
+                // If OTP expired, generate and send a fresh one
+                if (is_null($user->otp_expires_at) || $user->otp_expires_at->isPast()) {
+                    $otp = str_pad((string) random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
+                    $user->update([
+                        'otp_hash'         => Hash::make($otp),
+                        'otp_expires_at'   => now()->addMinutes(10),
+                        'otp_last_sent_at' => now(),
+                        'otp_attempts'     => 0,
+                    ]);
+                    app(\App\Services\PHPMailerService::class)->sendOtpEmail($user->email, $user->name, $otp, 10);
+                }
+
+                return redirect()->route('verification.notice')->with('info', 'يرجى توثيق بريدكِ الإلكتروني أولاً لتتمكني من الدخول إلى حسابكِ.');
+            }
+
             \Illuminate\Support\Facades\RateLimiter::clear($throttleKey);
             $request->session()->regenerate();
 
@@ -98,18 +119,36 @@ class CustomerAuthController extends Controller
             'password.confirmed' => 'تأكيد كلمة المرور غير متطابق',
         ]);
 
+        // Generate 6-digit random secure OTP
+        $otp = str_pad((string) random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
+
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'password' => Hash::make($request->password),
-            'role' => 'customer',
-            'is_active' => true,
+            'name'              => $request->name,
+            'email'             => $request->email,
+            'phone'             => $request->phone,
+            'password'          => Hash::make($request->password),
+            'role'              => 'customer',
+            'is_active'         => true,
+            'email_verified_at' => null,
+            'otp_hash'          => Hash::make($otp),
+            'otp_expires_at'    => now()->addMinutes(10),
+            'otp_last_sent_at'  => now(),
+            'otp_attempts'      => 0,
         ]);
 
-        Auth::login($user);
+        // Send OTP via PHPMailer
+        $mailer = app(\App\Services\PHPMailerService::class);
+        $result = $mailer->sendOtpEmail($user->email, $user->name, $otp, 10);
 
-        return redirect()->route('home')->with('success', 'تم إنشاء حسابكِ بنجاح! نورتِ متجر خيوط دعجاء.');
+        // Store user in session for verification page
+        $request->session()->put('verify_user_id', $user->id);
+        $request->session()->put('verify_email', $user->email);
+
+        if (!$result['success']) {
+            return redirect()->route('verification.notice')->with('warning', 'تم إنشاء الحساب، ولكن تعذر تسليم البريد عبر الخادم فوراً. يمكنكِ طلب إعادة إرسال الرمز.');
+        }
+
+        return redirect()->route('verification.notice')->with('success', 'تم إنشاء حسابكِ بنجاح! تم إرسال رمز التحقق (OTP) إلى بريدكِ الإلكتروني.');
     }
 
     public function logout(Request $request)
@@ -124,6 +163,12 @@ class CustomerAuthController extends Controller
     public function profile()
     {
         $user = Auth::user();
+
+        if (!$user->isAdmin() && !$user->isEmailVerified()) {
+            session(['verify_user_id' => $user->id, 'verify_email' => $user->email]);
+            return redirect()->route('verification.notice')->with('info', 'يرجى توثيق بريدكِ الإلكتروني للمتابعة.');
+        }
+
         $recentOrders = $user->orders()->with('items.product')->latest()->take(5)->get();
 
         return view('customer.profile', compact('user', 'recentOrders'));

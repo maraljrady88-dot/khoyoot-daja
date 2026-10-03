@@ -13,6 +13,7 @@ use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\Auth\CustomerAuthController;
+use App\Http\Controllers\Auth\EmailVerificationController;
 
 // Admin Controllers
 use App\Http\Controllers\Admin\AdminAuthController;
@@ -73,6 +74,11 @@ Route::post('/login', [CustomerAuthController::class, 'login'])->name('login.sub
 Route::get('/register', [CustomerAuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [CustomerAuthController::class, 'register'])->name('register.submit');
 Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('logout');
+
+// Email Verification (OTP via PHPMailer)
+Route::get('/verify-email', [EmailVerificationController::class, 'showVerification'])->name('verification.notice');
+Route::post('/verify-email', [EmailVerificationController::class, 'verify'])->name('verification.verify');
+Route::post('/verify-email/resend', [EmailVerificationController::class, 'resend'])->name('verification.resend');
 
 Route::middleware('auth')->group(function () {
     Route::get('/customer/profile', [CustomerAuthController::class, 'profile'])->name('customer.profile');

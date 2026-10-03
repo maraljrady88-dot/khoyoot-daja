@@ -26,6 +26,11 @@ class User extends Authenticatable
         'role',
         'is_active',
         'password',
+        'email_verified_at',
+        'otp_hash',
+        'otp_expires_at',
+        'otp_last_sent_at',
+        'otp_attempts',
     ];
 
     /**
@@ -36,6 +41,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'otp_hash',
     ];
 
     /**
@@ -47,9 +53,34 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'otp_expires_at' => 'datetime',
+            'otp_last_sent_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'otp_attempts' => 'integer',
         ];
+    }
+
+    public function isEmailVerified(): bool
+    {
+        return !is_null($this->email_verified_at);
+    }
+
+    public function canResendOtp(int $cooldownSeconds = 60): bool
+    {
+        if (is_null($this->otp_last_sent_at)) {
+            return true;
+        }
+        return $this->otp_last_sent_at->addSeconds($cooldownSeconds)->isPast();
+    }
+
+    public function getOtpCooldownSeconds(int $cooldownSeconds = 60): int
+    {
+        if (is_null($this->otp_last_sent_at)) {
+            return 0;
+        }
+        $diff = now()->diffInSeconds($this->otp_last_sent_at->copy()->addSeconds($cooldownSeconds), false);
+        return max(0, (int) $diff);
     }
 
     public function isAdmin(): bool
